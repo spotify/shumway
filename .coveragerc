@@ -1,0 +1,13 @@
+[run]
+branch = True
+source =
+    shumway
+
+[paths]
+source =
+   shumway
+   .tox/*/lib/python*/site-packages/shumway
+   .tox/pypy/site-packages/shumway
+
+[report]
+show_missing = True
