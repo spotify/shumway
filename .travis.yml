@@ -1,4 +1,4 @@
-dist: trusty
+dist: xenial
 sudo: false
 cache:
   directories:
@@ -14,7 +14,9 @@ matrix:
     env: TOXENV=py35
   - python: '3.6'
     env: TOXENV=py36
-  - python: pypy2.7-5.8.0
+  - python: '3.7'
+    env: TOXENV=py37
+  - python: pypy2.7-6.0
     env: TOXENV=pypy
 install:
 - pip install tox
