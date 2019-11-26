@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import json
 import socket
 import time
@@ -86,11 +87,14 @@ class Timer(Meter):
 
 class MetricRelay(object):
     """Create and send metrics"""
-    def __init__(self, default_key, ffwd_ip=FFWD_IP, ffwd_port=FFWD_PORT):
+    def __init__(self, default_key, ffwd_ip=FFWD_IP, ffwd_port=FFWD_PORT,
+                 default_attributes=None):
         self._metrics = {}
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._default_key = default_key
         self._ffwd_address = (ffwd_ip, ffwd_port)
+
+        self._default_attributes = copy.deepcopy(default_attributes)
 
     def emit(self, metric, value, attributes=None, tags=None):
         """Emit one-time metric that does not need to be stored."""
@@ -103,7 +107,8 @@ class MetricRelay(object):
         if metric in self._metrics:
             counter = self._metrics[metric]
         else:
-            counter = Counter(metric, key=self._default_key)
+            counter = Counter(metric, key=self._default_key,
+                              attributes=self._default_attributes)
             self._metrics[metric] = counter
         counter.incr(value)
 
@@ -112,7 +117,8 @@ class MetricRelay(object):
         if timer_metric in self._metrics:
             timer = self._metrics[timer_metric]
         else:
-            timer = Timer(metric, key=self._default_key)
+            timer = Timer(metric, key=self._default_key,
+                          attributes=self._default_attributes)
             self._metrics[timer_metric] = timer
         return timer
 

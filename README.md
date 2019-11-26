@@ -105,6 +105,16 @@ mr.set_timer('timing-this-thing', timer)
 mr.flush()
 ```
 
+### Default attributes for non-custom metrics
+MetricRelay can create metrics with a common set of attributes as well:
+
+```python
+import shumway
+
+attributes = dict(foo='bar')
+mr = shumway.MetricRelay(SERVICE_NAME, default_attributes=attributes)
+```
+
 ### Sending Metrics
 
 There are two ways to send metrics to the `ffwd` agent:
@@ -161,7 +171,7 @@ False
 
 ### Custom FFWD agents
 
-By default, `shumway` will send metrics to a local [`ffwd`](https://github.com/spotify/ffwd) agent at `127.0.0.1:19000`. 
+By default, `shumway` will send metrics to a local [`ffwd`](https://github.com/spotify/ffwd) agent at `127.0.0.1:19000`.
 
 If your `ffwd` agent is elsewhere, then pass that information through when initializing the `MetricRelay`:
 
@@ -172,8 +182,6 @@ mr = shumway.MetricRelay(SERVICE_NAME, ffwd_ip='10.99.0.1', ffwd_port=19001)
 
 # do the thing
 ```
-
-
 
 # Developer Setup
 

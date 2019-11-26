@@ -184,6 +184,24 @@ class MetricRelayTest(unittest2.TestCase):
         sock.sendto.assert_called_once_with(
             json.dumps(metric).encode('utf-8'), mr._ffwd_address)
 
+    def test_incr_and_send_with_default_attributes(self):
+        sock = self.patched[
+            'shumway.socket.socket'].mock_instance
+
+        mr = shumway.MetricRelay('key', default_attributes=dict(foo='bar'))
+        mr.incr('test')
+        mr.incr('test')
+        mr.flush()
+
+        metric = {'key': 'key',
+                  'attributes': {'what': 'test',
+                                 'foo': 'bar'},
+                  'value': 2,
+                  'type': 'metric',
+                  'tags': []}
+        sock.sendto.assert_called_once_with(
+            json.dumps(metric).encode('utf-8'), mr._ffwd_address)
+
     def test_custom_counter(self):
         sock = self.patched[
             'shumway.socket.socket'].mock_instance
@@ -212,7 +230,20 @@ class MetricRelayTest(unittest2.TestCase):
 
         mr.flush()
 
-        timer_init.assert_called_once_with('foo-timer', key='key')
+        timer_init.assert_called_once_with('foo-timer', key='key',
+                                           attributes=None)
+        assert timer.flush.called
+
+    @mock.patch('shumway.Timer', autospec=True)
+    def test_timer_with_default_attributes(self, timer_init):
+        attrs = dict(foo='bar')
+        mr = shumway.MetricRelay('key', default_attributes=attrs)
+        timer = mr.timer('foo-timer')
+
+        mr.flush()
+
+        timer_init.assert_called_once_with('foo-timer', key='key',
+                                           attributes=attrs)
         assert timer.flush.called
 
     @mock.patch('shumway.Timer', autospec=True)
@@ -224,7 +255,8 @@ class MetricRelayTest(unittest2.TestCase):
         mr.flush()
 
         self.assertEqual(timer, same_timer)
-        timer_init.assert_called_once_with('foo-timer', key='key')
+        timer_init.assert_called_once_with('foo-timer', key='key',
+                                           attributes=None)
         assert timer.flush.called
 
     def test_custom_timer(self):
