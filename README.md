@@ -161,7 +161,7 @@ False
 
 ### Custom FFWD agents
 
-By default, `shumway` will send metrics to a local [`ffwd`](https://github.com/spotify/ffwd) agent at `127.0.0.1:19000`. 
+By default, `shumway` will send metrics to a local [`ffwd`](https://github.com/spotify/ffwd) agent at `127.0.0.1:19000`.
 
 If your `ffwd` agent is elsewhere, then pass that information through when initializing the `MetricRelay`:
 
@@ -172,8 +172,6 @@ mr = shumway.MetricRelay(SERVICE_NAME, ffwd_ip='10.99.0.1', ffwd_port=19001)
 
 # do the thing
 ```
-
-
 
 # Developer Setup
 
