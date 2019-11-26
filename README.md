@@ -105,6 +105,16 @@ mr.set_timer('timing-this-thing', timer)
 mr.flush()
 ```
 
+### Default attributes for non-custom metrics
+MetricRelay can create metrics with a common set of attributes as well:
+
+```python
+import shumway
+
+attributes = dict(foo='bar')
+mr = shumway.MetricRelay(SERVICE_NAME, default_attributes=attributes)
+```
+
 ### Sending Metrics
 
 There are two ways to send metrics to the `ffwd` agent:
