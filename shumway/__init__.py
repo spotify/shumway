@@ -24,7 +24,7 @@ import six
 
 
 __author__ = 'Lynn Root'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __license__ = 'Apache 2.0'
 __email__ = 'lynn@spotify.com'
 __description__ = 'Micro metrics library for ffwd'
