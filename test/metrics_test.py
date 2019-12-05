@@ -252,7 +252,7 @@ class MetricRelayTest(unittest2.TestCase):
 
     @mock.patch('shumway.Timer', autospec=True)
     def test_timer(self, timer_init):
-        timer_init.return_value.as_map.return_value = {}
+        timer_init.return_value.as_dict.return_value = {}
         sock = self.patched[
             'shumway.socket.socket'].mock_instance
 
@@ -266,7 +266,7 @@ class MetricRelayTest(unittest2.TestCase):
 
     @mock.patch('shumway.Timer', autospec=True)
     def test_timer_with_default_attributes(self, timer_init):
-        timer_init.return_value.as_map.return_value = {}
+        timer_init.return_value.as_dict.return_value = {}
         sock = self.patched[
             'shumway.socket.socket'].mock_instance
 
@@ -281,7 +281,7 @@ class MetricRelayTest(unittest2.TestCase):
 
     @mock.patch('shumway.Timer', autospec=True)
     def test_getting_timer_twice(self, timer_init):
-        timer_init.return_value.as_map.return_value = {}
+        timer_init.return_value.as_dict.return_value = {}
         sock = self.patched[
             'shumway.socket.socket'].mock_instance
 
@@ -301,7 +301,7 @@ class MetricRelayTest(unittest2.TestCase):
             'shumway.socket.socket'].mock_instance
 
         timer = mock.Mock(shumway.Timer)
-        timer.as_map.return_value = {}
+        timer.as_dict.return_value = {}
 
         mr = shumway.MetricRelay('key')
         mr.set_timer('key', timer)

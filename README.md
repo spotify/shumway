@@ -105,6 +105,18 @@ mr.set_timer('timing-this-thing', timer)
 mr.flush()
 ```
 
+### Interacting with metrics objects
+Metric objects (like a timer) themselves have a `flush` function as well as a `as_dict` function
+
+```python
+import shumway
+
+timer = shumway.Timer('timing-this-thing', SERVICE_NAME,
+                      {'attr_1': value_1, 'attr_2': value_2})
+timer_as_dict = timer.as_dict()
+timer.flush(lambda dict: do_smth())
+```
+
 ### Default attributes for non-custom metrics
 MetricRelay can create metrics with a common set of attributes as well:
 

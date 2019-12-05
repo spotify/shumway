@@ -52,7 +52,7 @@ class Meter(object):
     def update(self, value):
         self.value = value
 
-    def as_map(self):
+    def as_dict(self):
         """Create a map of data"""
         return {
             'key': self.key,
@@ -64,7 +64,7 @@ class Meter(object):
 
     def flush(self, func):
         """Create a map of data and pass it to another function"""
-        func(self.as_map())
+        func(self.as_dict())
 
 
 class Counter(Meter):
@@ -152,7 +152,8 @@ class _UDPSender:
     def send(self, metrics):
         for metric in six.itervalues(metrics):
             self._sock.sendto(
-                json.dumps(metric.as_map()).encode('utf-8'), self._ffwd_address)
+                json.dumps(
+                    metric.as_dict()).encode('utf-8'), self._ffwd_address)
 
     def send_single(self, metric):
         self.send({metric.key: metric})
@@ -182,12 +183,12 @@ class _HTTPSender:
         self.send({metric.key: metric})
 
     def _convert_metric_to_http_payload(self, metric):
-        metrics_as_map = metric.as_map()
+        metrics_as_dict = metric.as_dict()
 
         return {
-            'key': metrics_as_map['key'],
-            'tags': metrics_as_map['attributes'],
+            'key': metrics_as_dict['key'],
+            'tags': metrics_as_dict['attributes'],
             'resource': {},
-            'value': metrics_as_map['value'],
+            'value': metrics_as_dict['value'],
             'timestamp': int(time.time() * 1000.0),
         }
