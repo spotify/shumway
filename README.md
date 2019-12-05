@@ -154,7 +154,6 @@ if not dry_run:
     mr.flush()
 ```
 
-
 ### Existing Metrics
 Check for existence of metrics in the MetricRelay with `in`:
 
@@ -182,6 +181,21 @@ mr = shumway.MetricRelay(SERVICE_NAME, ffwd_ip='10.99.0.1', ffwd_port=19001)
 
 # do the thing
 ```
+
+### Sending Metrics via HTTP to FFWD
+Instead of via UDP it is also possible to send metrics via HTTP by setting the `use_http` flag:
+
+```python
+import shumway
+
+mr = shumway.MetricRelay(SERVICE_NAME, 
+                         ffwd_host="http://my-metrics-api.com",
+                         ffwd_port=8080, 
+                         ffwd_path="/v1/metrics",
+                         use_http=True)
+```
+
+The `ffwd_host` parameter should be the HTTP endpoint and optionally `ffwd_path` can be set to specify the path.
 
 # Developer Setup
 
