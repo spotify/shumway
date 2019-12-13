@@ -105,6 +105,18 @@ mr.set_timer('timing-this-thing', timer)
 mr.flush()
 ```
 
+### Interacting with metrics objects
+Metric objects (like a timer) themselves have a `flush` function as well as a `as_dict` function
+
+```python
+import shumway
+
+timer = shumway.Timer('timing-this-thing', SERVICE_NAME,
+                      {'attr_1': value_1, 'attr_2': value_2})
+timer_as_dict = timer.as_dict()
+timer.flush(lambda dict: do_smth())
+```
+
 ### Default attributes for non-custom metrics
 MetricRelay can create metrics with a common set of attributes as well:
 
@@ -154,7 +166,6 @@ if not dry_run:
     mr.flush()
 ```
 
-
 ### Existing Metrics
 Check for existence of metrics in the MetricRelay with `in`:
 
@@ -182,6 +193,21 @@ mr = shumway.MetricRelay(SERVICE_NAME, ffwd_ip='10.99.0.1', ffwd_port=19001)
 
 # do the thing
 ```
+
+### Sending Metrics via HTTP to FFWD
+Instead of via UDP it is also possible to send metrics via HTTP by setting the `use_http` flag:
+
+```python
+import shumway
+
+mr = shumway.MetricRelay(SERVICE_NAME, 
+                         ffwd_host="http://my-metrics-api.com",
+                         ffwd_port=8080, 
+                         ffwd_path="/v1/metrics",
+                         use_http=True)
+```
+
+The `ffwd_host` parameter should be the HTTP endpoint and optionally `ffwd_path` can be set to specify the path.
 
 # Developer Setup
 

@@ -19,11 +19,12 @@ import json
 import socket
 import time
 
+import requests
 import six
 
 
 __author__ = 'Lynn Root'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __license__ = 'Apache 2.0'
 __email__ = 'lynn@spotify.com'
 __description__ = 'Micro metrics library for ffwd'
@@ -51,15 +52,19 @@ class Meter(object):
     def update(self, value):
         self.value = value
 
-    def flush(self, func):
-        """Create a map of data and pass it to another function"""
-        func({
+    def as_dict(self):
+        """Create a map of data"""
+        return {
             'key': self.key,
             'attributes': self._attributes,
             'value': self.value,
             'type': 'metric',
             'tags': self._tags
-        })
+        }
+
+    def flush(self, func):
+        """Create a map of data and pass it to another function"""
+        func(self.as_dict())
 
 
 class Counter(Meter):
@@ -87,14 +92,13 @@ class Timer(Meter):
 
 class MetricRelay(object):
     """Create and send metrics"""
-    def __init__(self, default_key, ffwd_ip=FFWD_IP, ffwd_port=FFWD_PORT,
-                 default_attributes=None):
+    def __init__(self, default_key, ffwd_host=FFWD_IP, ffwd_port=FFWD_PORT,
+                 ffwd_path=None, default_attributes=None, use_http=False):
         self._metrics = {}
-        self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._default_key = default_key
-        self._ffwd_address = (ffwd_ip, ffwd_port)
-
         self._default_attributes = copy.deepcopy(default_attributes)
+        self._sender = _HTTPSender(ffwd_host, ffwd_port, ffwd_path) \
+            if use_http else _UDPSender(ffwd_host, ffwd_port)
 
     def emit(self, metric, value, attributes=None, tags=None):
         """Emit one-time metric that does not need to be stored."""
@@ -130,16 +134,61 @@ class MetricRelay(object):
 
     def flush(self):
         """Send all metrics to FFWD"""
-        for metric in six.itervalues(self._metrics):
-            self.flush_single(metric)
+        self._sender.send(self._metrics)
 
     def flush_single(self, metric):
         """Send a metric to FFWD."""
-        metric.flush(self._sendto)
-
-    def _sendto(self, metric):
-        self._sock.sendto(
-            json.dumps(metric).encode('utf-8'), self._ffwd_address)
+        self._sender.send_single(metric)
 
     def __contains__(self, metric):
         return metric in self._metrics
+
+
+class _UDPSender:
+    def __init__(self, ffwd_host, ffwd_port):
+        self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._ffwd_address = (ffwd_host, ffwd_port)
+
+    def send(self, metrics):
+        for metric in six.itervalues(metrics):
+            self._sock.sendto(
+                json.dumps(
+                    metric.as_dict()).encode('utf-8'), self._ffwd_address)
+
+    def send_single(self, metric):
+        self.send({metric.key: metric})
+
+
+class _HTTPSender:
+    def __init__(self, ffwd_host, ffwd_port, ffwd_path):
+        if not ffwd_host.startswith("http") and ffwd_port == 443:
+            ffwd_host = "https://" + ffwd_host
+        elif not ffwd_host.startswith("http"):
+            ffwd_host = "http://" + ffwd_host
+
+        self._ffwd_url = "{}:{}".format(ffwd_host, ffwd_port)
+        self._ffwd_url = self._ffwd_url + ffwd_path \
+            if ffwd_path is not None else self._ffwd_url
+
+    def send(self, metrics):
+        metrics_resolved = [self._convert_metric_to_http_payload(m)
+                            for m in six.itervalues(metrics)]
+        metrics_payload = {
+            'points': metrics_resolved
+        }
+
+        requests.post(self._ffwd_url, json=metrics_payload).raise_for_status()
+
+    def send_single(self, metric):
+        self.send({metric.key: metric})
+
+    def _convert_metric_to_http_payload(self, metric):
+        metrics_as_dict = metric.as_dict()
+
+        return {
+            'key': metrics_as_dict['key'],
+            'tags': metrics_as_dict['attributes'],
+            'resource': {},
+            'value': metrics_as_dict['value'],
+            'timestamp': int(time.time() * 1000.0),
+        }
