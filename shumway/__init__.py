@@ -24,7 +24,7 @@ import six
 
 
 __author__ = 'Lynn Root'
-__version__ = '1.2.0'
+__version__ = '1.2.1'
 __license__ = 'Apache 2.0'
 __email__ = 'lynn@spotify.com'
 __description__ = 'Micro metrics library for ffwd'
@@ -92,13 +92,24 @@ class Timer(Meter):
 
 class MetricRelay(object):
     """Create and send metrics"""
-    def __init__(self, default_key, ffwd_host=FFWD_IP, ffwd_port=FFWD_PORT,
-                 ffwd_path=None, default_attributes=None, use_http=False):
+    def __init__(self, default_key, ffwd_host=None, ffwd_ip=None,
+                 ffwd_port=FFWD_PORT, ffwd_path=None, default_attributes=None,
+                 use_http=False):
+        if ffwd_host is not None and ffwd_ip is not None:
+            raise ValueError('Both "ffwd_host" and "ffwd_ip are set, but only '
+                             'one of them is allowed to be set at a time')
+        if ffwd_host is not None:
+            host = ffwd_host
+        elif ffwd_ip is not None:
+            host = ffwd_ip
+        else:
+            host = FFWD_IP
+
         self._metrics = {}
         self._default_key = default_key
         self._default_attributes = copy.deepcopy(default_attributes)
         self._sender = _HTTPSender(ffwd_host, ffwd_port, ffwd_path) \
-            if use_http else _UDPSender(ffwd_host, ffwd_port)
+            if use_http else _UDPSender(host, ffwd_port)
 
     def emit(self, metric, value, attributes=None, tags=None):
         """Emit one-time metric that does not need to be stored."""
