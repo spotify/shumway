@@ -53,13 +53,13 @@ mr.flush()
 
 #### Custom Counter Attributes
 
-Set custom attributes for metrics:
+Set custom attributes for metrics. Default attributes will be added to the Counter object if there are default attributes for the MetricRelay.
 
 ```python
 import shumway
 
 mr = shumway.MetricRelay(SERVICE_NAME)
-counter = shumway.counter(metric_name, SERVICE_NAME,
+counter = shumway.Counter(metric_name, SERVICE_NAME,
                           {attr_1: value_1,
                            attr_2: value_2})
 
@@ -89,7 +89,7 @@ mr.flush()
 ```
 
 ### Custom Timer Attributes
-Timers can also be created independently in order to set custom attributes:
+Timers can also be created independently in order to set custom attributes. Default attributes will be added to the Timer object if there are default attributes for the MetricRelay.
 
 ```python
 import shumway
@@ -117,8 +117,8 @@ timer_as_dict = timer.as_dict()
 timer.flush(lambda dict: do_smth())
 ```
 
-### Default attributes for non-custom metrics
-MetricRelay can create metrics with a common set of attributes as well:
+### Default attributes for metrics
+MetricRelay can create metrics with a common set of attributes as well. These will be added to any metrics created via the MetricRelay and to any object `set_*` on the Metrics.
 
 ```python
 import shumway
@@ -200,9 +200,9 @@ Instead of via UDP it is also possible to send metrics via HTTP by setting the `
 ```python
 import shumway
 
-mr = shumway.MetricRelay(SERVICE_NAME, 
+mr = shumway.MetricRelay(SERVICE_NAME,
                          ffwd_host="http://my-metrics-api.com",
-                         ffwd_port=8080, 
+                         ffwd_port=8080,
                          ffwd_path="/v1/metrics",
                          use_http=True)
 ```
