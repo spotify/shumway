@@ -200,9 +200,9 @@ Instead of via UDP it is also possible to send metrics via HTTP by setting the `
 ```python
 import shumway
 
-mr = shumway.MetricRelay(SERVICE_NAME, 
+mr = shumway.MetricRelay(SERVICE_NAME,
                          ffwd_host="http://my-metrics-api.com",
-                         ffwd_port=8080, 
+                         ffwd_port=8080,
                          ffwd_path="/v1/metrics",
                          use_http=True)
 ```
