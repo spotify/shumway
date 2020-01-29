@@ -41,9 +41,9 @@ class Meter(object):
     def __init__(self, what, key, attributes=None, tags=None, value=0):
         self.value = value
         self.key = key
-        self._attributes = {'what': what}
+        self.attributes = {'what': what}
         if attributes is not None:
-            self._attributes.update(attributes)
+            self.attributes.update(attributes)
         if tags is None:
             self._tags = []
         else:
@@ -56,7 +56,7 @@ class Meter(object):
         """Create a map of data"""
         return {
             'key': self.key,
-            'attributes': self._attributes,
+            'attributes': self.attributes,
             'value': self.value,
             'type': 'metric',
             'tags': self._tags
@@ -78,7 +78,7 @@ class Timer(Meter):
     """Time the duration of running something"""
     def __init__(self, what, key, attributes=None, tags=None):
         Meter.__init__(self, what, key, attributes, tags)
-        self._attributes.update({'unit': 'ns'})
+        self.attributes.update({'unit': 'ns'})
         self._start = None
         self.value = None
 
@@ -96,7 +96,11 @@ class MetricRelay(object):
                  ffwd_path=None, default_attributes=None, use_http=False):
         self._metrics = {}
         self._default_key = default_key
+
+        if default_attributes is None:
+            default_attributes = {}
         self._default_attributes = copy.deepcopy(default_attributes)
+
         self._sender = _HTTPSender(ffwd_host, ffwd_port, ffwd_path) \
             if use_http else _UDPSender(ffwd_host, ffwd_port)
 
@@ -127,9 +131,16 @@ class MetricRelay(object):
         return timer
 
     def set_counter(self, metric, counter):
+        merged_attributes = copy.deepcopy(self._default_attributes)
+        merged_attributes.update(counter.attributes)
+        counter.attributes = merged_attributes
         self._metrics[metric] = counter
 
     def set_timer(self, metric, timer):
+        merged_attributes = copy.deepcopy(self._default_attributes)
+        merged_attributes.update(timer.attributes)
+        timer.attributes = merged_attributes
+
         self._metrics['timer-{}'.format(metric)] = timer
 
     def flush(self):
