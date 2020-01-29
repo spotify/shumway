@@ -59,7 +59,7 @@ Set custom attributes for metrics. Default attributes will be added to the Count
 import shumway
 
 mr = shumway.MetricRelay(SERVICE_NAME)
-counter = shumway.counter(metric_name, SERVICE_NAME,
+counter = shumway.Counter(metric_name, SERVICE_NAME,
                           {attr_1: value_1,
                            attr_2: value_2})
 
