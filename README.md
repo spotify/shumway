@@ -127,6 +127,16 @@ attributes = dict(foo='bar')
 mr = shumway.MetricRelay(SERVICE_NAME, default_attributes=attributes)
 ```
 
+### Resource Identifiers
+MetricsRelay and send resource identifiers as well:
+
+```python
+import shumway
+
+resources = dict(podname='my_ephemeral_podname')
+mr = shumway.MetricRelay(SERVICE_NAME, default_resources=resources)
+```
+
 ### Sending Metrics
 
 There are two ways to send metrics to the `ffwd` agent:
