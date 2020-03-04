@@ -38,7 +38,8 @@ GIGA_UNIT = 1E9
 
 class Meter(object):
     """A single metric with updateable value (no local aggregation)."""
-    def __init__(self, what, key, attributes=None, resources=None, tags=None, value=0):
+    def __init__(self, what, key, attributes=None,
+                 resources=None, tags=None, value=0):
         self.value = value
         self.key = key
         self._attributes = {'what': what}
@@ -51,7 +52,6 @@ class Meter(object):
         self._resources = {}
         if resources is not None:
             self._resources.update(resources)
-        
 
     def update(self, value):
         self.value = value
@@ -120,7 +120,8 @@ class MetricRelay(object):
     def emit(self, metric, value, attributes=None, resources=None, tags=None):
         """Emit one-time metric that does not need to be stored."""
         one_time_metric = Meter(metric, key=self._default_key,
-                                value=value, attributes=attributes, resources=resources, tags=tags)
+                                value=value, attributes=attributes,
+                                resources=resources, tags=tags)
         self.flush_single(one_time_metric)
 
     def incr(self, metric, value=1):
