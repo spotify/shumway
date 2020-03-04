@@ -45,13 +45,13 @@ class Meter(object):
         self._attributes = {'what': what}
         if attributes is not None:
             self._attributes.update(attributes)
+        self._resources = dict()
+        if resources is not None:
+            self._resources.update(resources)
         if tags is None:
             self._tags = []
         else:
             self._tags = tags
-        self._resources = {}
-        if resources is not None:
-            self._resources.update(resources)
 
     def update(self, value):
         self.value = value

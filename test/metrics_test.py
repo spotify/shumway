@@ -143,6 +143,20 @@ class CounterTest(unittest2.TestCase):
             'tags': ['test::tag'],
             'type': 'metric'})
 
+    def test_flush_with_resources(self):
+        send_metric = mock.Mock()
+        C = shumway.Counter('test', 'key', attributes=None,
+                            resources={'res1': 'value'})
+        C.incr()
+        C.flush(send_metric)
+        send_metric.assert_called_once_with({
+            'key': 'key',
+            'attributes': {'what': 'test'},
+            'value': 1,
+            'type': 'metric',
+            'tags': [],
+            'resources': {'res1': 'value'}})
+
     def test_intial_value(self):
         C = shumway.Counter('test', 'key', value=4)
         C.incr(4)
@@ -164,15 +178,19 @@ class MetricRelayTest(unittest2.TestCase):
         mr = shumway.MetricRelay('key')
         attr = {'pod': 'gew1'}
         tags = ['cool-metric']
+        res = {'res1': 'value'}
 
-        mr.emit('one_time_metric', 22, attributes=attr, resources={}, tags=tags)
+        mr.emit('one_time_metric', 22,
+                attributes=attr,
+                resources=res,
+                tags=tags)
 
         metric = {'key': 'key',
                   'attributes': {'what': 'one_time_metric', 'pod': 'gew1'},
                   'value': 22,
                   'type': 'metric',
                   'tags': ['cool-metric'],
-                  'resources': {}}
+                  'resources': {'res1': 'value'}}
         sock.sendto.assert_called_once_with(
             json.dumps(metric).encode('utf-8'), mr._sender._ffwd_address)
 
@@ -255,6 +273,7 @@ class MetricRelayTest(unittest2.TestCase):
 
         metric = {'key': 'key',
                   'attributes': {'what': 'test', 'k': 'v'},
+
                   'value': 1,
                   'type': 'metric',
                   'tags': ['foo::bar'],
