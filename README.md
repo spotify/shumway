@@ -136,7 +136,7 @@ import shumway
 resources = dict(podname='my_ephemeral_podname')
 mr = shumway.MetricRelay(SERVICE_NAME, default_resources=resources)
 ```
-
+For more on resource identifiers see [Heroic Documentation](https://spotify.github.io/heroic/docs/data_model)
 ### Sending Metrics
 
 There are two ways to send metrics to the `ffwd` agent:
