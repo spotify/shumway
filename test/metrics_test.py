@@ -63,7 +63,11 @@ class TimerTest(unittest2.TestCase):
     @mock.patch('shumway.time.time')
     def test_timer_tags(self, time):
         time.side_effect = [0, 1]
-        timer = shumway.Timer('timer', 'key', {'test': 'test'}, ['test'])
+        timer = shumway.Timer('timer',
+                              'key',
+                              {'test': 'test'},
+                              {'res1': 'test'},
+                              ['test'])
         with timer:
             pass
         self.assertEqual(timer.value, 1000000000.0)
@@ -78,6 +82,7 @@ class TimerTest(unittest2.TestCase):
             'tags': [],
             'value': None,
             'attributes': {'what': 'timer', 'unit': 'ns'},
+            'resources': {},
             'key': 'key',
             'type': 'metric'})
 
@@ -107,6 +112,7 @@ class CounterTest(unittest2.TestCase):
         send_metric.assert_called_once_with({
             'key': 'key',
             'attributes': {'what': 'test'},
+            'resources': {},
             'value': 1,
             'tags': [],
             'type': 'metric'})
@@ -119,6 +125,7 @@ class CounterTest(unittest2.TestCase):
         send_metric.assert_called_once_with({
             'key': 'key',
             'attributes': {'what': 'test', 'k': 'v'},
+            'resources': {},
             'value': 1,
             'tags': [],
             'type': 'metric'})
@@ -131,9 +138,24 @@ class CounterTest(unittest2.TestCase):
         send_metric.assert_called_once_with({
             'key': 'key',
             'attributes': {'what': 'test'},
+            'resources': {},
             'value': 1,
             'tags': ['test::tag'],
             'type': 'metric'})
+
+    def test_flush_with_resources(self):
+        send_metric = mock.Mock()
+        C = shumway.Counter('test', 'key', attributes=None,
+                            resources={'res1': 'value'})
+        C.incr()
+        C.flush(send_metric)
+        send_metric.assert_called_once_with({
+            'key': 'key',
+            'attributes': {'what': 'test'},
+            'value': 1,
+            'type': 'metric',
+            'tags': [],
+            'resources': {'res1': 'value'}})
 
     def test_intial_value(self):
         C = shumway.Counter('test', 'key', value=4)
@@ -156,14 +178,19 @@ class MetricRelayTest(unittest2.TestCase):
         mr = shumway.MetricRelay('key')
         attr = {'pod': 'gew1'}
         tags = ['cool-metric']
+        res = {'res1': 'value'}
 
-        mr.emit('one_time_metric', 22, attributes=attr, tags=tags)
+        mr.emit('one_time_metric', 22,
+                attributes=attr,
+                resources=res,
+                tags=tags)
 
         metric = {'key': 'key',
                   'attributes': {'what': 'one_time_metric', 'pod': 'gew1'},
                   'value': 22,
                   'type': 'metric',
-                  'tags': ['cool-metric']}
+                  'tags': ['cool-metric'],
+                  'resources': {'res1': 'value'}}
         sock.sendto.assert_called_once_with(
             json.dumps(metric).encode('utf-8'), mr._sender._ffwd_address)
 
@@ -180,7 +207,8 @@ class MetricRelayTest(unittest2.TestCase):
                   'attributes': {'what': 'test'},
                   'value': 2,
                   'type': 'metric',
-                  'tags': []}
+                  'tags': [],
+                  'resources': {}}
         sock.sendto.assert_called_once_with(
             json.dumps(metric).encode('utf-8'), mr._sender._ffwd_address)
 
@@ -198,7 +226,8 @@ class MetricRelayTest(unittest2.TestCase):
                                  'foo': 'bar'},
                   'value': 2,
                   'type': 'metric',
-                  'tags': []}
+                  'tags': [],
+                  'resources': {}}
         sock.sendto.assert_called_once_with(
             json.dumps(metric).encode('utf-8'), mr._sender._ffwd_address)
 
@@ -246,7 +275,8 @@ class MetricRelayTest(unittest2.TestCase):
                   'attributes': {'what': 'test', 'k': 'v'},
                   'value': 1,
                   'type': 'metric',
-                  'tags': ['foo::bar']}
+                  'tags': ['foo::bar'],
+                  'resources': {}}
         sock.sendto.assert_called_once_with(
             json.dumps(metric).encode('utf-8'), mr._sender._ffwd_address)
 
@@ -261,7 +291,7 @@ class MetricRelayTest(unittest2.TestCase):
         mr.flush()
 
         timer_init.assert_called_once_with('foo-timer', key='key',
-                                           attributes=None)
+                                           attributes=None, resources=None)
         sock.sendto.assert_called_once()
 
     @mock.patch('shumway.Timer', autospec=True)
@@ -276,7 +306,7 @@ class MetricRelayTest(unittest2.TestCase):
         mr.flush()
 
         timer_init.assert_called_once_with('foo-timer', key='key',
-                                           attributes=attrs)
+                                           attributes=attrs, resources=None)
         sock.sendto.assert_called_once()
 
     @mock.patch('shumway.Timer', autospec=True)
@@ -293,7 +323,7 @@ class MetricRelayTest(unittest2.TestCase):
 
         self.assertEqual(timer, same_timer)
         timer_init.assert_called_once_with('foo-timer', key='key',
-                                           attributes=None)
+                                           attributes=None, resources=None)
         sock.sendto.assert_called_once()
 
     def test_custom_timer(self):

@@ -38,12 +38,16 @@ GIGA_UNIT = 1E9
 
 class Meter(object):
     """A single metric with updateable value (no local aggregation)."""
-    def __init__(self, what, key, attributes=None, tags=None, value=0):
+    def __init__(self, what, key, attributes=None,
+                 resources=None, tags=None, value=0):
         self.value = value
         self.key = key
         self._attributes = {'what': what}
         if attributes is not None:
             self._attributes.update(attributes)
+        self._resources = dict()
+        if resources is not None:
+            self._resources.update(resources)
         if tags is None:
             self._tags = []
         else:
@@ -59,7 +63,8 @@ class Meter(object):
             'attributes': self._attributes,
             'value': self.value,
             'type': 'metric',
-            'tags': self._tags
+            'tags': self._tags,
+            'resources': self._resources
         }
 
     def flush(self, func):
@@ -76,8 +81,8 @@ class Counter(Meter):
 
 class Timer(Meter):
     """Time the duration of running something"""
-    def __init__(self, what, key, attributes=None, tags=None):
-        Meter.__init__(self, what, key, attributes, tags)
+    def __init__(self, what, key, attributes=None, resources=None, tags=None):
+        Meter.__init__(self, what, key, attributes, resources, tags)
         self._attributes.update({'unit': 'ns'})
         self._start = None
         self.value = None
@@ -94,7 +99,7 @@ class MetricRelay(object):
     """Create and send metrics"""
     def __init__(self, default_key, ffwd_host=None, ffwd_ip=None,
                  ffwd_port=FFWD_PORT, ffwd_path=None, default_attributes=None,
-                 use_http=False):
+                 default_resources=None, use_http=False):
         if ffwd_host is not None and ffwd_ip is not None:
             raise ValueError('Both "ffwd_host" and "ffwd_ip are set, but only '
                              'one of them is allowed to be set at a time')
@@ -108,13 +113,15 @@ class MetricRelay(object):
         self._metrics = {}
         self._default_key = default_key
         self._default_attributes = copy.deepcopy(default_attributes)
+        self._default_resources = copy.deepcopy(default_resources)
         self._sender = _HTTPSender(ffwd_host, ffwd_port, ffwd_path) \
             if use_http else _UDPSender(host, ffwd_port)
 
-    def emit(self, metric, value, attributes=None, tags=None):
+    def emit(self, metric, value, attributes=None, resources=None, tags=None):
         """Emit one-time metric that does not need to be stored."""
         one_time_metric = Meter(metric, key=self._default_key,
-                                value=value, attributes=attributes, tags=tags)
+                                value=value, attributes=attributes,
+                                resources=resources, tags=tags)
         self.flush_single(one_time_metric)
 
     def incr(self, metric, value=1):
@@ -123,7 +130,8 @@ class MetricRelay(object):
             counter = self._metrics[metric]
         else:
             counter = Counter(metric, key=self._default_key,
-                              attributes=self._default_attributes)
+                              attributes=self._default_attributes,
+                              resources=self._default_resources)
             self._metrics[metric] = counter
         counter.incr(value)
 
@@ -133,7 +141,8 @@ class MetricRelay(object):
             timer = self._metrics[timer_metric]
         else:
             timer = Timer(metric, key=self._default_key,
-                          attributes=self._default_attributes)
+                          attributes=self._default_attributes,
+                          resources=self._default_resources)
             self._metrics[timer_metric] = timer
         return timer
 
@@ -199,7 +208,7 @@ class _HTTPSender:
         return {
             'key': metrics_as_dict['key'],
             'tags': metrics_as_dict['attributes'],
-            'resource': {},
+            'resource': metrics_as_dict['resources'],
             'value': metrics_as_dict['value'],
             'timestamp': int(time.time() * 1000.0),
         }
