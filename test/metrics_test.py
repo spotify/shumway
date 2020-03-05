@@ -273,7 +273,6 @@ class MetricRelayTest(unittest2.TestCase):
 
         metric = {'key': 'key',
                   'attributes': {'what': 'test', 'k': 'v'},
-
                   'value': 1,
                   'type': 'metric',
                   'tags': ['foo::bar'],
