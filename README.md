@@ -219,6 +219,15 @@ mr = shumway.MetricRelay(SERVICE_NAME,
 
 The `ffwd_host` parameter should be the HTTP endpoint and optionally `ffwd_path` can be set to specify the path.
 
+
+# Changes
+
+## Unreleased
+
+## 2.0.0
+
+* Positional arguments for `Meter()`, `Counter()`, `Timer()`, and `MetricRelay(...).emit()` were changed to add `resources`. If using only named arguments this should not be a problem.
+
 # Developer Setup
 
 For development and running tests, your system must have all supported versions of Python installed. We suggest using [pyenv](https://github.com/yyuu/pyenv).
