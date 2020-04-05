@@ -24,7 +24,7 @@ import six
 
 
 __author__ = 'Lynn Root'
-__version__ = '2.0.0'
+__version__ = '2.0.1'
 __license__ = 'Apache 2.0'
 __email__ = 'lynn@spotify.com'
 __description__ = 'Micro metrics library for ffwd'
@@ -42,12 +42,12 @@ class Meter(object):
                  resources=None, tags=None, value=0):
         self.value = value
         self.key = key
-        self._attributes = {'what': what}
+        self.attributes = {'what': what}
         if attributes is not None:
-            self._attributes.update(attributes)
-        self._resources = dict()
+            self.attributes.update(attributes)
+        self.resources = dict()
         if resources is not None:
-            self._resources.update(resources)
+            self.resources.update(resources)
         if tags is None:
             self._tags = []
         else:
@@ -60,11 +60,11 @@ class Meter(object):
         """Create a map of data"""
         return {
             'key': self.key,
-            'attributes': self._attributes,
+            'attributes': self.attributes,
             'value': self.value,
             'type': 'metric',
             'tags': self._tags,
-            'resources': self._resources
+            'resources': self.resources
         }
 
     def flush(self, func):
@@ -83,7 +83,7 @@ class Timer(Meter):
     """Time the duration of running something"""
     def __init__(self, what, key, attributes=None, resources=None, tags=None):
         Meter.__init__(self, what, key, attributes, resources, tags)
-        self._attributes.update({'unit': 'ns'})
+        self.attributes.update({'unit': 'ns'})
         self._start = None
         self.value = None
 
@@ -112,6 +112,10 @@ class MetricRelay(object):
 
         self._metrics = {}
         self._default_key = default_key
+        if default_attributes is None:
+            default_attributes = {}
+        if default_resources is None:
+            default_resources = {}
         self._default_attributes = copy.deepcopy(default_attributes)
         self._default_resources = copy.deepcopy(default_resources)
         self._sender = _HTTPSender(ffwd_host, ffwd_port, ffwd_path) \
@@ -122,6 +126,12 @@ class MetricRelay(object):
         one_time_metric = Meter(metric, key=self._default_key,
                                 value=value, attributes=attributes,
                                 resources=resources, tags=tags)
+        merged_attributes = copy.deepcopy(self._default_attributes)
+        merged_attributes.update(one_time_metric.attributes)
+        one_time_metric.attributes = merged_attributes
+        merged_resources = copy.deepcopy(self._default_resources)
+        merged_resources.update(one_time_metric.resources)
+        one_time_metric.resources = merged_resources
         self.flush_single(one_time_metric)
 
     def incr(self, metric, value=1):
@@ -147,9 +157,21 @@ class MetricRelay(object):
         return timer
 
     def set_counter(self, metric, counter):
+        merged_attributes = copy.deepcopy(self._default_attributes)
+        merged_attributes.update(counter.attributes)
+        counter.attributes = merged_attributes
+        merged_resources = copy.deepcopy(self._default_resources)
+        merged_resources.update(counter.resources)
+        counter.resources = merged_resources
         self._metrics[metric] = counter
 
     def set_timer(self, metric, timer):
+        merged_attributes = copy.deepcopy(self._default_attributes)
+        merged_attributes.update(timer.attributes)
+        timer.attributes = merged_attributes
+        merged_resources = copy.deepcopy(self._default_resources)
+        merged_resources.update(timer.resources)
+        timer.resources = merged_resources
         self._metrics['timer-{}'.format(metric)] = timer
 
     def flush(self):

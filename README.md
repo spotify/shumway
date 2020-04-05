@@ -53,13 +53,13 @@ mr.flush()
 
 #### Custom Counter Attributes
 
-Set custom attributes for metrics:
+Set custom attributes for metrics. Default attributes/reousrces will be added to the Counter object if there are default attributes for the MetricRelay.
 
 ```python
 import shumway
 
 mr = shumway.MetricRelay(SERVICE_NAME)
-counter = shumway.counter(metric_name, SERVICE_NAME,
+counter = shumway.Counter(metric_name, SERVICE_NAME,
                           {attr_1: value_1,
                            attr_2: value_2})
 
@@ -89,7 +89,7 @@ mr.flush()
 ```
 
 ### Custom Timer Attributes
-Timers can also be created independently in order to set custom attributes:
+Timers can also be created independently in order to set custom attributes. Default attributes/resources will be added to the Timer object if there are default attributes for the MetricRelay.
 
 ```python
 import shumway
@@ -117,8 +117,8 @@ timer_as_dict = timer.as_dict()
 timer.flush(lambda dict: do_smth())
 ```
 
-### Default attributes for non-custom metrics
-MetricRelay can create metrics with a common set of attributes as well:
+### Default attributes for metrics
+MetricRelay can create metrics with a common set of attributes as well. These will be added to any metrics created via the MetricRelay and to any object `set_*` on the Metrics.
 
 ```python
 import shumway
@@ -223,6 +223,10 @@ The `ffwd_host` parameter should be the HTTP endpoint and optionally `ffwd_path`
 # Changes
 
 ## Unreleased
+
+## 2.0.1
+
+* Default attributes and resources created on the MetricRelay will be inheritted by custom timers/counters now as well as one-off metrics via `.emit()`
 
 ## 2.0.0
 
