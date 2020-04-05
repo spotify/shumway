@@ -280,6 +280,50 @@ class MetricRelayTest(unittest2.TestCase):
         sock.sendto.assert_called_once_with(
             json.dumps(metric).encode('utf-8'), mr._sender._ffwd_address)
 
+    def test_custom_counter_with_default_attributes(self):
+        sock = self.patched[
+            'shumway.socket.socket'].mock_instance
+
+        attrs = dict(foo='bar')
+        mr = shumway.MetricRelay('key', default_attributes=attrs)
+        mr.set_counter(
+            'test', shumway.Counter('test', 'key',
+                                    attributes={'k': 'v'}))
+        mr.incr('test')
+
+        mr.flush()
+
+        metric = {'key': 'key',
+                  'attributes': {'foo': 'bar', 'what': 'test', 'k': 'v'},
+                  'value': 1,
+                  'type': 'metric',
+                  'tags': [],
+                  'resources': {}}
+        sock.sendto.assert_called_once_with(
+            json.dumps(metric).encode('utf-8'), mr._sender._ffwd_address)
+
+    def test_custom_counter_with_default_resources(self):
+        sock = self.patched[
+            'shumway.socket.socket'].mock_instance
+
+        resources = dict(foo='bar')
+        mr = shumway.MetricRelay('key', default_resources=resources)
+        mr.set_counter(
+            'test', shumway.Counter('test', 'key',
+                                    resources={'k': 'v'}))
+        mr.incr('test')
+
+        mr.flush()
+
+        metric = {'key': 'key',
+                  'attributes': {'what': 'test'},
+                  'value': 1,
+                  'type': 'metric',
+                  'tags': [],
+                  'resources': {'foo': 'bar', 'k': 'v'}}
+        sock.sendto.assert_called_once_with(
+            json.dumps(metric).encode('utf-8'), mr._sender._ffwd_address)
+
     @mock.patch('shumway.Timer', autospec=True)
     def test_timer(self, timer_init):
         timer_init.return_value.as_dict.return_value = {}
@@ -291,7 +335,7 @@ class MetricRelayTest(unittest2.TestCase):
         mr.flush()
 
         timer_init.assert_called_once_with('foo-timer', key='key',
-                                           attributes=None, resources=None)
+                                           attributes={}, resources={})
         sock.sendto.assert_called_once()
 
     @mock.patch('shumway.Timer', autospec=True)
@@ -306,7 +350,7 @@ class MetricRelayTest(unittest2.TestCase):
         mr.flush()
 
         timer_init.assert_called_once_with('foo-timer', key='key',
-                                           attributes=attrs, resources=None)
+                                           attributes=attrs, resources={})
         sock.sendto.assert_called_once()
 
     @mock.patch('shumway.Timer', autospec=True)
@@ -323,7 +367,7 @@ class MetricRelayTest(unittest2.TestCase):
 
         self.assertEqual(timer, same_timer)
         timer_init.assert_called_once_with('foo-timer', key='key',
-                                           attributes=None, resources=None)
+                                           attributes={}, resources={})
         sock.sendto.assert_called_once()
 
     def test_custom_timer(self):
@@ -331,6 +375,8 @@ class MetricRelayTest(unittest2.TestCase):
             'shumway.socket.socket'].mock_instance
 
         timer = mock.Mock(shumway.Timer)
+        timer.attributes = {}
+        timer.resources = {}
         timer.as_dict.return_value = {}
 
         mr = shumway.MetricRelay('key')
@@ -338,6 +384,51 @@ class MetricRelayTest(unittest2.TestCase):
         mr.flush()
 
         sock.sendto.assert_called_once()
+
+    def test_custom_timer_with_default_metric_relay_attributes(self):
+        sock = self.patched[
+            'shumway.socket.socket'].mock_instance
+
+        timer = shumway.Timer('test-timer', 'key')
+        timer.update(10)
+
+        attrs = dict(foo='bar')
+        mr = shumway.MetricRelay('key', default_attributes=attrs)
+        mr.set_timer('key', timer)
+        mr.flush()
+
+        metric = {'key': 'key',
+                  'attributes': {'foo': 'bar',
+                                 'what': 'test-timer',
+                                 'unit': 'ns'},
+                  'value': 10,
+                  'type': 'metric',
+                  'tags': [],
+                  'resources': {}}
+        sock.sendto.assert_called_once_with(
+            json.dumps(metric).encode('utf-8'), mr._sender._ffwd_address)
+
+    def test_custom_timer_with_default_metric_relay_resources(self):
+        sock = self.patched[
+            'shumway.socket.socket'].mock_instance
+
+        timer = shumway.Timer('test-timer', 'key')
+        timer.update(10)
+
+        resources = dict(foo='bar')
+        mr = shumway.MetricRelay('key', default_resources=resources)
+        mr.set_timer('key', timer)
+        mr.flush()
+
+        metric = {'key': 'key',
+                  'attributes': {'what': 'test-timer',
+                                 'unit': 'ns'},
+                  'value': 10,
+                  'type': 'metric',
+                  'tags': [],
+                  'resources': {'foo': 'bar'}}
+        sock.sendto.assert_called_once_with(
+            json.dumps(metric).encode('utf-8'), mr._sender._ffwd_address)
 
     def test_creates_UDP_socket(self):
         sock = self.patched['shumway.socket.socket'].mock_object
