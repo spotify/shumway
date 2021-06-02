@@ -73,7 +73,6 @@ mr.flush()
 counter. You will likely want to use a unique metric name for each set of
 attributes you are setting.
 
-
 ### Timers
 
 ```python
@@ -89,6 +88,7 @@ mr.flush()
 ```
 
 ### Custom Timer Attributes
+
 Timers can also be created independently in order to set custom attributes:
 
 ```python
@@ -106,6 +106,7 @@ mr.flush()
 ```
 
 ### Interacting with metrics objects
+
 Metric objects (like a timer) themselves have a `flush` function as well as a `as_dict` function
 
 ```python
@@ -118,6 +119,7 @@ timer.flush(lambda dict: do_smth())
 ```
 
 ### Default attributes for non-custom metrics
+
 MetricRelay can create metrics with a common set of attributes as well:
 
 ```python
@@ -128,6 +130,7 @@ mr = shumway.MetricRelay(SERVICE_NAME, default_attributes=attributes)
 ```
 
 ### Resource Identifiers
+
 MetricsRelay and send resource identifiers as well:
 
 ```python
@@ -136,7 +139,9 @@ import shumway
 resources = dict(podname='my_ephemeral_podname')
 mr = shumway.MetricRelay(SERVICE_NAME, default_resources=resources)
 ```
+
 For more on resource identifiers see [Heroic Documentation](https://spotify.github.io/heroic/docs/data_model)
+
 ### Sending Metrics
 
 There are two ways to send metrics to the `ffwd` agent:
@@ -177,6 +182,7 @@ if not dry_run:
 ```
 
 ### Existing Metrics
+
 Check for existence of metrics in the MetricRelay with `in`:
 
 ```pycon
@@ -205,6 +211,7 @@ mr = shumway.MetricRelay(SERVICE_NAME, ffwd_ip='10.99.0.1', ffwd_port=19001)
 ```
 
 ### Sending Metrics via HTTP to FFWD
+
 Instead of via UDP it is also possible to send metrics via HTTP by setting the `use_http` flag:
 
 ```python
@@ -219,16 +226,15 @@ mr = shumway.MetricRelay(SERVICE_NAME,
 
 The `ffwd_host` parameter should be the HTTP endpoint and optionally `ffwd_path` can be set to specify the path.
 
+## Changes
 
-# Changes
+### Unreleased
 
-## Unreleased
-
-## 2.0.0
+### 2.0.0
 
 * Positional arguments for `Meter()`, `Counter()`, `Timer()`, and `MetricRelay(...).emit()` were changed to add `resources`. If using only named arguments this should not be a problem.
 
-# Developer Setup
+## Developer Setup
 
 For development and running tests, your system must have all supported versions of Python installed. We suggest using [pyenv](https://github.com/yyuu/pyenv).
 
@@ -265,7 +271,7 @@ To run an individual test, call `nosetests` directly:
 (env) $ nosetests test/metrics_test.py
 ```
 
-# Code of Conduct
+## Code of Conduct
 
 This project adheres to the [Open Code of Conduct][code-of-conduct]. By participating, you are expected to honor this code.
 
