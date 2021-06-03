@@ -17,10 +17,10 @@
 import collections
 import json
 import socket
-import unittest2
 
 import mock
 import six
+import unittest2
 
 import shumway
 
