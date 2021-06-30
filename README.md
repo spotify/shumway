@@ -230,6 +230,10 @@ The `ffwd_host` parameter should be the HTTP endpoint and optionally `ffwd_path`
 
 ### Unreleased
 
+### 3.0.0 - 3.0.2
+
+* Major version bump due to dependency updates and change to supported Python versions.
+
 ### 2.0.0
 
 * Positional arguments for `Meter()`, `Counter()`, `Timer()`, and `MetricRelay(...).emit()` were changed to add `resources`. If using only named arguments this should not be a problem.
