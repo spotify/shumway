@@ -1,12 +1,12 @@
 # shumway
 
-[![Build Status](https://travis-ci.org/spotify/shumway.svg?branch=master)](https://travis-ci.org/spotify/shumway) [![Test Coverage](https://codecov.io/github/spotify/shumway/branch/master/graph/badge.svg)](https://codecov.io/github/spotify/shumway)
+[![Build Status](https://github.com/spotify/shumway/actions/workflows/main.yml/badge.svg)](https://github.com/spotify/shumway/actions/workflows/main.yml) [![Test Coverage](https://codecov.io/github/spotify/shumway/branch/master/graph/badge.svg)](https://codecov.io/github/spotify/shumway)
 
 A micro library for sending metrics to a [FFWD](https://github.com/spotify/ffwd) agent.
 
 ## Requirements
 
-* Python 3.6. Tests pass on Python 3.6, 3.7, and 3.8., and PyPy 7.3.3 (3.6).
+* Python 3.6. Tests pass on Python 3.6, 3.7, and 3.8, and on the latest PyPy3 at build-time.
 * Support for Linux & OS X
 
 ## To Use
