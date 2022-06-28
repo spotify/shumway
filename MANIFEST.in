@@ -1,3 +1,5 @@
 include *.md *.txt LICENSE tox.ini .coveragerc
 recursive-include shumway *.py
 recursive-include test *.py
+
+exclude catalog-info.yaml
