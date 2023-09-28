@@ -230,6 +230,10 @@ The `ffwd_host` parameter should be the HTTP endpoint and optionally `ffwd_path`
 
 ### Unreleased
 
+### 3.0.3
+
+* Fix [SNYK-PYTHON-REQUESTS-5595532](https://snyk.io/vuln/SNYK-PYTHON-REQUESTS-5595532) vulnerability
+
 ### 3.0.0 - 3.0.2
 
 * Major version bump due to dependency updates and change to supported Python versions.
