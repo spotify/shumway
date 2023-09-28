@@ -6,7 +6,7 @@ A micro library for sending metrics to a [FFWD](https://github.com/spotify/ffwd)
 
 ## Requirements
 
-* Python 3.6. Tests pass on Python 3.6, 3.7, and 3.8, and on the latest PyPy3 at build-time.
+* Python 3.7. Tests pass on 3.7, and 3.8, and on the latest PyPy3 at build-time.
 * Support for Linux & OS X
 
 ## To Use
@@ -230,7 +230,11 @@ The `ffwd_host` parameter should be the HTTP endpoint and optionally `ffwd_path`
 
 ### Unreleased
 
-### 3.0.0 - 3.0.3
+### 4.0.0
+
+* Remove python3.6 and use python3.7 as a minimum required version
+
+### 3.0.0 - 3.0.2
 
 * Major version bump due to dependency updates and change to supported Python versions.
 
@@ -265,7 +269,7 @@ If you want to run the test suite for a specific version of Python:
 
 ```sh
 # outside of the virtualenv
-$ tox -e py36
+$ tox -e py37
 ```
 
 To run an individual test, call `nosetests` directly:
