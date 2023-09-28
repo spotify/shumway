@@ -96,5 +96,7 @@ setup(
     classifiers=CLASSIFIERS,
     keywords=KEYWORDS,
     zip_safe=False,
-    install_requires=install_requires()
+    install_requires=install_requires(),
+    long_description=open('README.md').read(),
+    long_description_content_type='text/markdown'
 )
