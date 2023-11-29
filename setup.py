@@ -87,6 +87,8 @@ setup(
     version=find_meta('version'),
     license=find_meta('license'),
     description=find_meta('description'),
+    long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
     url=find_meta('uri'),
     author=find_meta('author'),
     author_email=find_meta('email'),
@@ -96,7 +98,5 @@ setup(
     classifiers=CLASSIFIERS,
     keywords=KEYWORDS,
     zip_safe=False,
-    install_requires=install_requires(),
-    long_description=open('README.md').read(),
-    long_description_content_type='text/markdown'
+    install_requires=install_requires()
 )
